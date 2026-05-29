@@ -59,8 +59,10 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] **Crash testing — EXECUTED on Godot 4.6.3:** 400 runs, 0 crashes/violations (`docs/TEST_RESULTS.md`)
 - [x] **Save/load testing — EXECUTED:** round-trip PASS
 - [x] **Balance verified & fixed:** was 100% fail → now 38% arrival (found+fixed 3 real bugs this pass)
+- [x] **Store policy review — DONE:** clause-by-clause audit vs Apple/Google guidelines (`docs/STORE_POLICY_REVIEW.md`); no outright violations, open items are integration steps
+- [x] **Android build toolchain installed + export preset** (`export_presets.cfg`, `docs/ANDROID_BUILD.md`); APK export is 1-click in the Godot GUI (headless CLI can't surface config-validation reasons)
 - [ ] 20 private testers; Android internal test; iOS TestFlight  *(needs devices/accounts — human)*
-- [ ] Low-end Android perf testing; store policy review  *(needs hardware — human)*
+- [ ] Low-end Android perf testing on device  *(needs hardware — human)*
 
 ## Milestone 8 — Store Launch Prep 🟡 (all copy/compliance prepped; capture needs build)
 - [x] App icon (`icon.svg` master)

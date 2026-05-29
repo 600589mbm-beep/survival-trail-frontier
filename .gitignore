@@ -23,3 +23,6 @@ google-services.json
 GoogleService-Info.plist
 .env
 marketing/trailer/frames/
+
+# Godot Android build template (regenerated via Install Android Build Template)
+/android/
