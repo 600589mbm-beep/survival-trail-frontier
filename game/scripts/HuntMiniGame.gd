@@ -112,6 +112,7 @@ func _process(delta: float) -> void:
 func _on_shoot() -> void:
 	if not _active:
 		return
+	AudioManager.play_sfx("shot")
 	var center: float = _marker_x + 3.0
 	if center >= _zone_min and center <= _zone_max:
 		_hits += 1

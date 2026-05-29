@@ -19,6 +19,7 @@ GameState="*res://game/autoload/GameState.gd"
 SaveManager="*res://game/autoload/SaveManager.gd"
 Analytics="*res://game/autoload/Analytics.gd"
 Monetization="*res://game/autoload/Monetization.gd"
+AudioManager="*res://game/autoload/AudioManager.gd"
 
 [display]
 

@@ -16,31 +16,33 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] 5 party, 8 resources, 3 endings, save/load
 - [x] Leader perks, outfitter economy, daily challenge, trail log
 
-## Milestone 3 — Vertical Slice ✅ (mostly done; needs art/audio)
+## Milestone 3 — Vertical Slice ✅ (code complete; needs painted art)
 - [x] Real touch UI (large buttons, scroll, portrait)
-- [x] 10+ polished events (38 total)
+- [x] 10+ polished events (83 total)
 - [x] Hunting/scavenging mini-game (`HuntMiniGame.gd`)
-- [x] River/crossing decisions (`river_ford`, `river_swell`)
+- [x] River/crossing decisions (`river_ford`, `river_swell`, `tide_crossing`, `bridge_out`)
 - [x] Illness system (named conditions w/ daily drain + cure)
 - [x] Final destination / ending screen
-- [ ] Real music & SFX  *(needs audio assets)*
-- [ ] Replace code-drawn UI with painted art  *(needs Aseprite/PS assets)*
+- [x] **Real music & SFX** — procedural synth (`AudioManager.gd`), no external assets
+- [ ] Replace code-drawn UI with painted art  *(needs Aseprite/PS assets — human)*
 
-## Milestone 4 — Full Production 🟡 (foundation in; expand content)
-- [x] Weather system (per-biome tables)
-- [x] Trading posts (`trade_post`, `wagon_trader`, `greywell`)
+## Milestone 4 — Full Production ✅ (content targets met; tune & art ongoing)
+- [x] Weather system (per-biome tables; 5 biomes)
+- [x] Trading posts (`trade_post`, `wagon_trader`, `town_doctor`, `blacksmith`)
 - [x] Injuries & illness, morale & relationship (member bonds)
 - [x] Multiple wagon types (3)
 - [x] Multiple endings (3)
-- [x] Routes: 3 of 4–6  → **TODO: add 1–3 more**
-- [ ] Events: 38 of 80–150  → **TODO: expand**
-- [ ] Recruitable characters: 5 of 20+  → **TODO: recruitment system**
+- [x] **Routes: 5** (target 4–6) — temperate/desert/alpine/swamp/coast
+- [x] **Events: 83** (target 80–150)
+- [x] **Recruitable characters: 20** + 5 leaders (target 20+) — recruitment via events
+- [ ] Balance pass once telemetry from testers is in
 
-## Milestone 5 — Mobile Polish 🟡
+## Milestone 5 — Mobile Polish ✅ (perf done; cloud save optional)
 - [x] Touch-first UI, large buttons, one-thumb nav
 - [x] Auto-save (after each day + each choice)
 - [x] Offline play (no network dependency)
-- [ ] Battery/perf pass on low-end Android
+- [x] **Battery/perf:** `OS.low_processor_usage_mode` (idle redraw) + 60 fps cap; full fps only in mini-game
+- [ ] On-device low-end Android profiling  *(needs hardware — human)*
 - [ ] Cloud save (only if needed)
 
 ## Milestone 6 — Monetization 🟡 (framework in; needs SDK)

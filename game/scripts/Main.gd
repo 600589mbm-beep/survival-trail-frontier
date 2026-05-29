@@ -16,6 +16,11 @@ var _current_event: Dictionary = {}
 var _sel := {"leader": 0, "route": 0, "wagon": "settler", "daily": false, "seed": 0}
 
 func _ready() -> void:
+	# Battery: this is a turn-based, mostly-static UI. Redraw only on input
+	# (low-processor mode) and cap FPS. The hunt mini-game flips this off while
+	# it animates (see _launch_hunt / _on_hunt_finished).
+	Engine.max_fps = 60
+	OS.low_processor_usage_mode = true
 	GameState.run_ended.connect(_on_run_ended)
 	_show_title()
 
@@ -77,6 +82,7 @@ func _button(text: String, cb: Callable, accent := false) -> Button:
 	b.add_theme_stylebox_override("hover", sbh)
 	b.add_theme_stylebox_override("pressed", sbh)
 	b.add_theme_color_override("font_color", BG if accent else TEXT)
+	b.pressed.connect(func(): AudioManager.play_sfx("click"))
 	b.pressed.connect(cb)
 	return b
 
@@ -284,6 +290,7 @@ func _stat_panel() -> Control:
 	return box
 
 func _do_day(pace_key: String) -> void:
+	AudioManager.play_sfx("travel")
 	var ev := GameState.advance_day(pace_key)
 	if not GameState.running:
 		return
@@ -332,6 +339,7 @@ func _show_result(text: String) -> void:
 
 # ---------- HUNT MINI-GAME ----------
 func _launch_hunt() -> void:
+	OS.low_processor_usage_mode = false # smooth animation during the mini-game
 	for c in get_children():
 		c.queue_free()
 	var hunt = load("res://game/scripts/HuntMiniGame.gd").new()
@@ -340,6 +348,8 @@ func _launch_hunt() -> void:
 
 func _on_hunt_finished(hits: int, hunt) -> void:
 	hunt.queue_free()
+	OS.low_processor_usage_mode = true # back to battery-friendly static UI
+	AudioManager.play_sfx("success" if hits > 0 else "fail")
 	GameState.apply_hunt_result(hits)
 	if not GameState.running:
 		return
@@ -377,6 +387,12 @@ func _show_settings() -> void:
 				Monetization.unlock_skin(sid)
 				_show_settings()))
 
+	var audio := _panel(vb)
+	audio.add_child(_label("Audio", 24, _accent(), true))
+	audio.add_child(_button("Sound: %s" % ("Off" if AudioManager.is_muted() else "On"), func():
+		AudioManager.set_muted(not AudioManager.is_muted())
+		_show_settings()))
+
 	var data := _panel(vb)
 	data.add_child(_label("Save Data", 24, _accent(), true))
 	data.add_child(_button("Erase saved run", func():
@@ -387,6 +403,7 @@ func _show_settings() -> void:
 
 # ---------- ENDING ----------
 func _on_run_ended(ending: Dictionary) -> void:
+	AudioManager.play_sfx("success" if ending.good else "fail")
 	Analytics.run_ended(ending.id, GameState.day - 1, GameState.miles, GameState.living_count())
 	var vb := _fresh()
 	vb.add_child(_spacer(30))

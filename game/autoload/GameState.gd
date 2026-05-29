@@ -28,6 +28,7 @@ var running: bool = false
 var seed_value: int = 0
 var daily_challenge: bool = false
 var log_lines: Array = []
+var recruited_names: Array = []   # names already used so we don't recruit duplicates
 var _rng := RandomNumberGenerator.new()
 var _run_morale: float = 60.0
 
@@ -47,6 +48,7 @@ func new_run(leader_idx: int, route_idx: int, wagon_id: String, is_daily: bool =
 	running = true
 	_run_morale = 60.0
 	log_lines.clear()
+	recruited_names.clear()
 
 	resources = {}
 	for r in EventDB.RESOURCES:
@@ -191,7 +193,30 @@ func _apply_outcome(o: Dictionary) -> void:
 		_cure(String(o.cure.who), String(o.cure.cond))
 	if o.has("bond"):
 		_adjust_bond(String(o.bond.who), int(o.bond.amount))
+	if o.has("recruit") and bool(o.recruit):
+		_recruit()
 	_resolve_health()
+
+# Add a new member from the recruit roster (skips names already used / present).
+func _recruit() -> void:
+	var pool := []
+	for r in EventDB.RECRUITS:
+		if not recruited_names.has(r.name) and not _has_member(r.name):
+			pool.append(r)
+	if pool.is_empty():
+		return
+	var pick: Dictionary = pool[_rng.randi_range(0, pool.size() - 1)]
+	var member := _make_member(pick.name, pick.trait)
+	member.bond = 50
+	party.append(member)
+	recruited_names.append(pick.name)
+	_log("%s (%s) joins the party." % [pick.name, pick.trait])
+
+func _has_member(nm: String) -> bool:
+	for m in party:
+		if m.name == nm:
+			return true
+	return false
 
 # Apply the hunting mini-game outcome (called by UI after the mini-game ends).
 func apply_hunt_result(hits: int) -> void:
@@ -342,6 +367,7 @@ func snapshot() -> Dictionary:
 		"day": day, "miles": miles, "total_miles": total_miles, "weather": weather,
 		"run_morale": _run_morale, "seed": seed_value, "running": running,
 		"daily_challenge": daily_challenge, "log_lines": log_lines,
+		"recruited_names": recruited_names,
 	}
 
 func restore(d: Dictionary) -> void:
@@ -361,5 +387,6 @@ func restore(d: Dictionary) -> void:
 	running = bool(d.running)
 	daily_challenge = bool(d.get("daily_challenge", false))
 	log_lines = d.get("log_lines", [])
+	recruited_names = d.get("recruited_names", [])
 	_rng.seed = seed_value
 	emit_signal("state_changed")

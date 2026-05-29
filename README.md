@@ -9,14 +9,16 @@ The core loop is implemented and playable, plus the systems that make it a real 
 **leader → route → wagon → outfitter → day-by-day travel → consume → weather → procedural events → choices (incl. hunting mini-game) → illness/relationships → reach destination or fail.**
 
 Included now:
-- **3 routes** (temperate / desert / alpine) · **3 wagon types** · **5 party** · **38 events** · **8 resources** · **3 endings**
-- **Weather system** (per-biome), **named illness** conditions (daily drain + cure), **relationship/morale** (member bonds)
+- **5 routes** (temperate / desert / alpine / swamp / coast) · **3 wagon types** · **5 starting party + 20 recruitable characters** · **83 events** · **8 resources** · **3 endings**
+- **Weather system** (per-biome), **named illness** conditions (daily drain + cure), **relationship/morale** (member bonds), **recruitment** (events add party members)
+- **Real procedural audio** (`AudioManager.gd`): synthesized looping theme + SFX, **no external/IP assets**, mute toggle
 - **Hunting mini-game**, outfitter economy, leader perks, **daily seeded challenge**
 - **Save/load + auto-save** after every day and choice (offline, mobile-safe)
+- **Battery/perf:** event-driven redraw (`OS.low_processor_usage_mode`) on static screens, 60 fps cap, full fps only during the mini-game
 - **Monetization framework** (`Monetization.gd`): Remove-Ads IAP ($4.99) + cosmetic skins, **no pay-to-win** — SDK swap-in only
 - **Analytics funnel** (`Analytics.gd`): run starts/ends, quit points, session length, "felt unfair" flags
 
-All GDScript is parse-verified with `gdtoolkit` (`gdparse`). UI is code-drawn — real art/audio layer on top without touching logic.
+All GDScript is parse-verified with `gdtoolkit` (`gdparse`). Visuals are code-drawn placeholder; painted art layers on top without touching logic.
 
 ## Run it
 1. Install **Godot 4.6.3 stable** (standard, not .NET).
