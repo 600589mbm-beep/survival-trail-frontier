@@ -1,7 +1,7 @@
 # Store Listing Copy — paste-ready
 
 **Support email:** `support@survivaltrailfrontier.com` *(create this mailbox once the domain is registered; used in both stores + privacy policy).*
-**Marketing URL:** `https://survivaltrailfrontier.com` (landing page in `marketing/landing-page/`).
+**Marketing URL:** live now at `https://600589mbm-beep.github.io/survival-trail-frontier-site/` (GitHub Pages); point `survivaltrailfrontier.com` here once the domain is registered. Source in `marketing/landing-page/`.
 **Category:** Games → Strategy (secondary: Simulation / Role Playing).
 
 ## Apple App Store

@@ -72,7 +72,7 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] **Filled compliance answers** (`docs/COMPLIANCE.md`: Play Data Safety, Apple privacy labels, age rating)
 - [x] **8 real screenshots CAPTURED** from the running game (Godot 4.6.3 under xvfb) → `marketing/screenshots/shot_*.png` (placeholder-art UI; recapture after painted art)
 - [x] **30-second trailer RENDERED** (`marketing/trailer/trailer.mp4`, 30.0s, from 10 captured frames via ffmpeg; add music/VO per `SCRIPT.md`)
-- [ ] Deploy landing page live (gh-pages ready; **awaiting your OK** — auto-mode blocked publishing a public site from a private repo)
+- [x] **Landing page DEPLOYED LIVE** (you authorized it): https://600589mbm-beep.github.io/survival-trail-frontier-site/ — served via GitHub Pages from a dedicated public repo `survival-trail-frontier-site` (private repo's plan doesn't support Pages)
 
 ## Milestone 9 — Soft Launch → Full Launch 🟡 (runbook + marketing kit ready)
 - [x] **Launch runbook** (`docs/LAUNCH_RUNBOOK.md`), **press kit** (`marketing/press-kit/`), **social/Reddit/press drafts** (`marketing/social/POSTS.md`)
