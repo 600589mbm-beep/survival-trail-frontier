@@ -5,63 +5,79 @@ signal state_changed
 signal day_logged(text)
 signal run_ended(ending)
 
-# Pace presets: miles/day and consumption multiplier for travel items.
 const PACES := {
-	"steady":   {"label":"Steady",   "miles":45, "mult":1.0,  "morale":0},
-	"grueling": {"label":"Grueling", "miles":70, "mult":1.4,  "morale":-3},
-	"rest":     {"label":"Rest",     "miles":0,  "mult":0.5,  "morale":4},
+	"steady":   {"label":"Steady",   "miles":45, "mult":1.0, "morale":0},
+	"grueling": {"label":"Grueling", "miles":70, "mult":1.4, "morale":-3},
+	"rest":     {"label":"Rest",     "miles":0,  "mult":0.5, "morale":4},
 }
+
+const BASE_MONEY := 60
 
 var leader_index: int = 0
 var leader: Dictionary = {}
-var party: Array = []          # [{name, trait, health(0-100), alive, morale_bonus}]
-var resources: Dictionary = {} # res_name -> int
+var route_index: int = 0
+var route: Dictionary = {}
+var wagon: Dictionary = {}
+var party: Array = []           # [{name,trait,health,alive,bond,conditions:[String]}]
+var resources: Dictionary = {}
 var day: int = 1
 var miles: int = 0
 var total_miles: int = 0
+var weather: String = "clear"
 var running: bool = false
 var seed_value: int = 0
 var daily_challenge: bool = false
+var log_lines: Array = []
 var _rng := RandomNumberGenerator.new()
-var log_lines: Array = []      # rolling recent log
-
-func _ready() -> void:
-	pass
+var _run_morale: float = 60.0
 
 # --- run lifecycle ---
-func new_run(leader_idx: int, starting_money: int = 60, is_daily: bool = false, daily_seed: int = 0) -> void:
+func new_run(leader_idx: int, route_idx: int, wagon_id: String, is_daily: bool = false, daily_seed: int = 0) -> void:
 	leader_index = leader_idx
 	leader = EventDB.LEADERS[leader_idx]
+	route_index = route_idx
+	route = EventDB.ROUTES[route_idx]
+	wagon = _wagon_by_id(wagon_id)
 	daily_challenge = is_daily
-	if is_daily:
-		seed_value = daily_seed
-	else:
-		seed_value = randi()
+	seed_value = daily_seed if is_daily else randi()
 	_rng.seed = seed_value
 	day = 1
 	miles = 0
-	total_miles = EventDB.ROUTE.total_miles
+	total_miles = int(route.total_miles)
 	running = true
+	_run_morale = 60.0
 	log_lines.clear()
 
-	# Resources start near-empty except money; player buys at outfitter.
 	resources = {}
 	for r in EventDB.RESOURCES:
 		resources[r] = 0
-	resources["money"] = starting_money
-	# small free starter so a no-buy run isn't instantly dead
+	resources["money"] = BASE_MONEY + int(wagon.get("start_money", 0))
 	resources["food"] = 20
 	resources["water"] = 20
 	resources["feed"] = 10
 
-	# Build party: leader at index 0, then template members.
 	party = []
-	party.append({"name": leader.name, "trait": leader.trait, "health": 100, "alive": true})
+	party.append(_make_member(leader.name, leader.trait))
 	for m in EventDB.PARTY_TEMPLATE:
-		party.append({"name": m.name, "trait": m.trait, "health": 100, "alive": true})
+		party.append(_make_member(m.name, m.trait))
 
+	_roll_weather()
 	emit_signal("state_changed")
 
+func _make_member(nm: String, tr: String) -> Dictionary:
+	return {"name": nm, "trait": tr, "health": 100, "alive": true, "bond": 60, "conditions": []}
+
+func _wagon_by_id(id: String) -> Dictionary:
+	for w in EventDB.WAGONS:
+		if w.id == id:
+			return w
+	return EventDB.WAGONS[1] # settler default
+
+func _roll_weather() -> void:
+	var table: Array = EventDB.BIOME_WEATHER.get(route.get("biome", "temperate"), ["clear"])
+	weather = table[_rng.randi_range(0, table.size() - 1)]
+
+# --- outfitter ---
 func outfitter_price(res_name: String) -> int:
 	var base := int(EventDB.OUTFITTER_PRICES.get(res_name, 999))
 	if leader.get("bonus") == "cheap_outfit":
@@ -77,45 +93,45 @@ func buy(res_name: String, qty: int) -> bool:
 	emit_signal("state_changed")
 	return true
 
-# --- daily tick. Returns an event dict to present, or {} if none. ---
+# --- daily tick ---
 func advance_day(pace_key: String) -> Dictionary:
 	if not running:
 		return {}
 	var pace: Dictionary = PACES[pace_key]
+	var wx: Dictionary = EventDB.WEATHER[weather]
 	var alive := living_count()
 
-	# consume
+	# consume (weather raises consumption)
 	for r in EventDB.DAILY_CONSUMPTION.keys():
-		var amt: int = int(round(EventDB.DAILY_CONSUMPTION[r] * alive * pace.mult))
+		var amt: int = int(round(EventDB.DAILY_CONSUMPTION[r] * alive * pace.mult * wx.consume_mult))
 		resources[r] = max(0, resources[r] - amt)
 
-	# starvation / thirst -> health loss
 	_apply_scarcity()
+	_progress_illness(pace_key)
 
-	# pace morale
-	_adjust_morale(pace.morale)
+	# morale: pace + weather + slow grind (leader Steady cancels grind)
+	_adjust_morale(int(pace.morale) + int(wx.morale))
 	if leader.get("bonus") != "morale_decay_slow":
-		_adjust_morale(-1) # slow natural grind
+		_adjust_morale(-1)
 
-	# travel
-	miles = min(total_miles, miles + int(pace.miles))
+	# travel (weather + wagon modify miles)
+	var miles_today := int(round(pace.miles * float(wx.miles_mult) * float(wagon.get("miles_mult", 1.0))))
+	miles = min(total_miles, miles + miles_today)
 	day += 1
+	_roll_weather()
 
-	# resolve health -> deaths
 	_resolve_health()
-
-	var line := "Day %d — %d/%d miles. %s pace." % [day - 1, miles, total_miles, pace.label]
-	_log(line)
-
+	_log("Day %d — %d/%d mi · %s pace · %s." % [day - 1, miles, total_miles, pace.label, EventDB.WEATHER[weather].label])
 	emit_signal("state_changed")
 
-	# arrival?
+	if running:
+		SaveManager.save_game() # auto-save (mobile polish)
+
 	if miles >= total_miles or living_count() <= 0:
 		_finish()
 		return {}
 
-	# event roll: rest days are calmer
-	var event_chance := 0.55 if pace_key != "rest" else 0.3
+	var event_chance := (0.55 if pace_key != "rest" else 0.3) + float(wx.event_bonus)
 	if _rng.randf() < event_chance:
 		return _pick_event()
 	return {}
@@ -132,7 +148,7 @@ func _pick_event() -> Dictionary:
 			return e
 	return pool[0]
 
-# --- apply a chosen option's outcome dict. Returns result log text. ---
+# --- choice resolution ---
 func apply_choice(choice: Dictionary) -> String:
 	var outcome: Dictionary
 	if choice.has("chance"):
@@ -144,6 +160,8 @@ func apply_choice(choice: Dictionary) -> String:
 		outcome = choice.get("effects", {})
 	_apply_outcome(outcome)
 	emit_signal("state_changed")
+	if running and miles < total_miles and living_count() > 0:
+		SaveManager.save_game()
 	if miles >= total_miles or living_count() <= 0:
 		_finish()
 	var txt: String = outcome.get("log", "")
@@ -155,19 +173,41 @@ func _apply_outcome(o: Dictionary) -> void:
 	if o.has("res"):
 		for r in o.res.keys():
 			var delta: int = int(o.res[r])
-			# leader efficiencies soften costs
 			if delta < 0 and r == "medicine" and leader.get("bonus") == "medicine_efficient":
 				delta = int(delta / 2)
-			if delta < 0 and r == "parts" and leader.get("bonus") == "parts_efficient":
-				delta = int(ceil(delta / 2.0))
+			if delta < 0 and r == "parts":
+				var resist: float = float(wagon.get("parts_resist", 0.0))
+				if leader.get("bonus") == "parts_efficient":
+					resist = min(0.75, resist + 0.5)
+				delta = int(ceil(delta * (1.0 - resist)))
 			resources[r] = max(0, resources.get(r, 0) + delta)
 	if o.has("morale"):
 		_adjust_morale(int(o.morale))
 	if o.has("health"):
 		_apply_health(int(o.health.amount), String(o.health.get("target", "random")))
+	if o.has("inflict"):
+		_inflict(String(o.inflict.who), String(o.inflict.cond))
+	if o.has("cure"):
+		_cure(String(o.cure.who), String(o.cure.cond))
+	if o.has("bond"):
+		_adjust_bond(String(o.bond.who), int(o.bond.amount))
 	_resolve_health()
 
-# --- party stat helpers ---
+# Apply the hunting mini-game outcome (called by UI after the mini-game ends).
+func apply_hunt_result(hits: int) -> void:
+	var food := hits * 12
+	resources["food"] += food
+	if food > 0:
+		_adjust_morale(2)
+		_log("The hunt brought in %d food (%d clean shots)." % [food, hits])
+	else:
+		_adjust_morale(-2)
+		_log("The hunt came up empty. Ammo spent for nothing.")
+	emit_signal("state_changed")
+	if running:
+		SaveManager.save_game()
+
+# --- party stats ---
 func living_count() -> int:
 	var n := 0
 	for m in party:
@@ -175,14 +215,31 @@ func living_count() -> int:
 			n += 1
 	return n
 
-func avg_morale() -> float:
-	# morale modeled as average health proxy + a run morale meter
-	return clampf(_run_morale, 0, 100)
+func _avg_bond() -> float:
+	var total := 0.0
+	var n := 0
+	for m in party:
+		if m.alive:
+			total += float(m.bond)
+			n += 1
+	return (total / n) if n > 0 else 0.0
 
-var _run_morale: float = 60.0
+func avg_morale() -> float:
+	# cohesion (run morale) blended with relationship bonds
+	return clampf(0.6 * _run_morale + 0.4 * _avg_bond(), 0, 100)
 
 func _adjust_morale(d: int) -> void:
 	_run_morale = clampf(_run_morale + d, 0, 100)
+
+func _adjust_bond(who: String, amount: int) -> void:
+	if who == "all":
+		for m in party:
+			if m.alive:
+				m.bond = clampi(m.bond + amount, 0, 100)
+	else:
+		var pick := _pick_alive()
+		if pick != null:
+			pick.bond = clampi(pick.bond + amount, 0, 100)
 
 func _apply_scarcity() -> void:
 	var penalty := 0
@@ -194,6 +251,39 @@ func _apply_scarcity() -> void:
 		_apply_health(-penalty, "all")
 		_adjust_morale(-3)
 
+func _progress_illness(pace_key: String) -> void:
+	for m in party:
+		if not m.alive:
+			continue
+		var keep: Array = []
+		for cond in m.conditions:
+			var info: Dictionary = EventDB.ILLNESSES[cond]
+			m.health = clampi(m.health - int(info.drain), 0, 100)
+			# Exhaustion clears on a Rest day; others linger until treated.
+			if cond == "exhaustion" and pace_key == "rest":
+				continue
+			keep.append(cond)
+		m.conditions = keep
+
+func _inflict(who: String, cond: String) -> void:
+	if who == "all":
+		for m in party:
+			if m.alive and not m.conditions.has(cond):
+				m.conditions.append(cond)
+	else:
+		var pick = _pick_alive() if who == "random" else _worst()
+		if pick != null and not pick.conditions.has(cond):
+			pick.conditions.append(cond)
+
+func _cure(who: String, cond: String) -> void:
+	if who == "all":
+		for m in party:
+			m.conditions.erase(cond)
+	else:
+		var pick = _pick_alive() if who == "random" else _worst()
+		if pick != null:
+			pick.conditions.erase(cond)
+
 func _apply_health(amount: int, target: String) -> void:
 	if amount == 0:
 		return
@@ -202,20 +292,29 @@ func _apply_health(amount: int, target: String) -> void:
 			if m.alive:
 				m.health = clampi(m.health + amount, 0, 100)
 	elif target == "worst":
-		var worst = null
-		for m in party:
-			if m.alive and (worst == null or m.health < worst.health):
-				worst = m
-		if worst != null:
-			worst.health = clampi(worst.health + amount, 0, 100)
-	else: # random
-		var alive_members := []
-		for m in party:
-			if m.alive:
-				alive_members.append(m)
-		if alive_members.size() > 0:
-			var pick = alive_members[_rng.randi_range(0, alive_members.size() - 1)]
+		var w := _worst()
+		if w != null:
+			w.health = clampi(w.health + amount, 0, 100)
+	else:
+		var pick := _pick_alive()
+		if pick != null:
 			pick.health = clampi(pick.health + amount, 0, 100)
+
+func _pick_alive():
+	var alive_members := []
+	for m in party:
+		if m.alive:
+			alive_members.append(m)
+	if alive_members.is_empty():
+		return null
+	return alive_members[_rng.randi_range(0, alive_members.size() - 1)]
+
+func _worst():
+	var w = null
+	for m in party:
+		if m.alive and (w == null or m.health < w.health):
+			w = m
+	return w
 
 func _resolve_health() -> void:
 	for m in party:
@@ -226,8 +325,8 @@ func _resolve_health() -> void:
 
 func _finish() -> void:
 	running = false
-	var ending := EventDB.get_ending(living_count(), avg_morale())
-	emit_signal("run_ended", ending)
+	SaveManager.clear_save()
+	emit_signal("run_ended", EventDB.get_ending(living_count(), avg_morale()))
 
 func _log(text: String) -> void:
 	log_lines.append(text)
@@ -238,8 +337,9 @@ func _log(text: String) -> void:
 # --- save snapshot ---
 func snapshot() -> Dictionary:
 	return {
-		"leader_index": leader_index, "party": party, "resources": resources,
-		"day": day, "miles": miles, "total_miles": total_miles,
+		"leader_index": leader_index, "route_index": route_index,
+		"wagon_id": wagon.get("id", "settler"), "party": party, "resources": resources,
+		"day": day, "miles": miles, "total_miles": total_miles, "weather": weather,
 		"run_morale": _run_morale, "seed": seed_value, "running": running,
 		"daily_challenge": daily_challenge, "log_lines": log_lines,
 	}
@@ -247,11 +347,15 @@ func snapshot() -> Dictionary:
 func restore(d: Dictionary) -> void:
 	leader_index = int(d.leader_index)
 	leader = EventDB.LEADERS[leader_index]
+	route_index = int(d.get("route_index", 0))
+	route = EventDB.ROUTES[route_index]
+	wagon = _wagon_by_id(String(d.get("wagon_id", "settler")))
 	party = d.party
 	resources = d.resources
 	day = int(d.day)
 	miles = int(d.miles)
 	total_miles = int(d.total_miles)
+	weather = String(d.get("weather", "clear"))
 	_run_morale = float(d.run_morale)
 	seed_value = int(d.seed)
 	running = bool(d.running)

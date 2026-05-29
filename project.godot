@@ -17,6 +17,8 @@ config/icon="res://icon.svg"
 EventDB="*res://game/autoload/EventDB.gd"
 GameState="*res://game/autoload/GameState.gd"
 SaveManager="*res://game/autoload/SaveManager.gd"
+Analytics="*res://game/autoload/Analytics.gd"
+Monetization="*res://game/autoload/Monetization.gd"
 
 [display]
 
