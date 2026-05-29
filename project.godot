@@ -1,0 +1,35 @@
+; Engine configuration file.
+; Survival Trail: Frontier — Godot 4.6.3 stable
+; Open in Godot; press F5 to run.
+
+config_version=5
+
+[application]
+
+config/name="Survival Trail: Frontier"
+config/description="Lead a wagon party through choices, sickness, supplies, and danger."
+run/main_scene="res://game/scenes/Main.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+config/icon="res://icon.svg"
+
+[autoload]
+
+EventDB="*res://game/autoload/EventDB.gd"
+GameState="*res://game/autoload/GameState.gd"
+SaveManager="*res://game/autoload/SaveManager.gd"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation="portrait"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
