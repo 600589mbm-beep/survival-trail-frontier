@@ -68,8 +68,9 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] Landing page (`marketing/landing-page/index.html`)
 - [x] **Store listing copy** (`docs/STORE_LISTING.md`) + **support email defined**
 - [x] **Filled compliance answers** (`docs/COMPLIANCE.md`: Play Data Safety, Apple privacy labels, age rating)
-- [x] **Screenshot storyboard + 8 mockups** (`marketing/screenshots/`), **trailer script** (`marketing/trailer/`)
-- [ ] Capture 8 real screenshots + record 30s trailer from running build  *(needs build/devices — human)*
+- [x] **8 real screenshots CAPTURED** from the running game (Godot 4.6.3 under xvfb) → `marketing/screenshots/shot_*.png` (placeholder-art UI; recapture after painted art)
+- [x] **30-second trailer RENDERED** (`marketing/trailer/trailer.mp4`, 30.0s, from 10 captured frames via ffmpeg; add music/VO per `SCRIPT.md`)
+- [ ] Deploy landing page live (gh-pages ready; **awaiting your OK** — auto-mode blocked publishing a public site from a private repo)
 
 ## Milestone 9 — Soft Launch → Full Launch 🟡 (runbook + marketing kit ready)
 - [x] **Launch runbook** (`docs/LAUNCH_RUNBOOK.md`), **press kit** (`marketing/press-kit/`), **social/Reddit/press drafts** (`marketing/social/POSTS.md`)

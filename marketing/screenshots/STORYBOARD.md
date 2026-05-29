@@ -1,6 +1,8 @@
 # Screenshot Storyboard (8)
 
-Capture from a running build at the device sizes in `docs/STORE_LISTING.md`. Each gets a short caption banner (top third). Placeholder mockups (`mock_1.svg` … `mock_8.svg`) show framing + caption — replace with real captures.
+**Real captures done:** `shot_1_title.png … shot_8_ending.png` are actual frames grabbed from the running game (Godot 4.6.3 under xvfb, 720×1280). They use the current placeholder (code-drawn) UI — recapture at full device resolutions after painted art lands. The `mock_*.svg` files are the earlier caption/framing mockups, kept for the overlay text.
+
+Original capture pipeline: `tests/CaptureShots.gd` + `tests/CaptureShots.tscn` (drives the real screens, saves PNGs; also dumps 10 trailer frames → `marketing/trailer/frames/` → `trailer.mp4`).
 
 | # | Screen to capture | Caption overlay |
 |---|---|---|
