@@ -95,6 +95,35 @@ func buy(res_name: String, qty: int) -> bool:
 	emit_signal("state_changed")
 	return true
 
+# Sell back at roughly half the buy price (trader bonus softens the loss).
+func sell_price(res_name: String) -> int:
+	var base: int = max(1, int(EventDB.OUTFITTER_PRICES.get(res_name, 2) / 2))
+	if leader.get("bonus") == "cheap_outfit":
+		base += 1
+	return base
+
+func sell(res_name: String, qty: int) -> bool:
+	if qty <= 0 or resources.get(res_name, 0) < qty:
+		return false
+	resources[res_name] -= qty
+	resources["money"] += sell_price(res_name) * qty
+	emit_signal("state_changed")
+	return true
+
+# --- towns / trading posts along the route ---
+func nearby_town() -> Dictionary:
+	for t in route.get("towns", []):
+		if miles >= int(t.mile) - 25 and miles <= int(t.mile) + 60:
+			return t
+	return {}
+
+func next_town() -> Dictionary:
+	var best: Dictionary = {}
+	for t in route.get("towns", []):
+		if int(t.mile) + 60 >= miles and (best.is_empty() or int(t.mile) < int(best.mile)):
+			best = t
+	return best
+
 # --- a day spent NOT travelling (hunting / resting at a town). No miles, no random event. ---
 func pass_day_no_travel(pace_key: String, food_mult: float = 1.0) -> void:
 	if not running:

@@ -61,14 +61,19 @@ const SKINS := [
 # --- Routes (3 of the 4-6 production target). biome drives weather table. ---
 const ROUTES := [
 	{"id":"ashford",  "name":"The Ashford Reach", "total_miles":800,  "biome":"temperate", "difficulty":"Medium",
+		"towns":[{"name":"Greywell","mile":150},{"name":"Halford Station","mile":380},{"name":"Marrow's Rest","mile":600}],
 		"intro":"Eight hundred miles of broken country lie between Fort Kestrel and the green valleys of Ashford. Load the wagon. Choose your road. Not everyone arrives."},
 	{"id":"saltpan",  "name":"The Saltpan Crossing", "total_miles":600, "biome":"desert", "difficulty":"Hard",
-		"intro":"Six hundred miles of salt flats and dead air. Water is everything here. Leave Greywell with full casks or don't leave at all."},
+		"towns":[{"name":"Dust Hollow","mile":120},{"name":"Saltgate","mile":320},{"name":"Last Well","mile":500}],
+		"intro":"Six hundred miles of salt flats and dead air. Water is everything here. Leave with full casks or don't leave at all."},
 	{"id":"wintergale","name":"Wintergale Pass", "total_miles":1000, "biome":"alpine", "difficulty":"Brutal",
+		"towns":[{"name":"Coldridge","mile":200},{"name":"Pine Hollow","mile":450},{"name":"Snowgate","mile":700},{"name":"High Camp","mile":900}],
 		"intro":"A thousand miles over the spine of the world. The cold does not negotiate. Clothing and feed matter as much as courage."},
 	{"id":"mire", "name":"The Drowned Mire", "total_miles":700, "biome":"swamp", "difficulty":"Hard",
+		"towns":[{"name":"Bogend","mile":160},{"name":"Greenferry","mile":400},{"name":"Reedmarket","mile":580}],
 		"intro":"Seven hundred miles of black water and rotting timber. The mire breeds sickness and swallows wagons whole. Keep your medicine close."},
 	{"id":"coast","name":"The Shattered Coast", "total_miles":900, "biome":"coast", "difficulty":"Hard",
+		"towns":[{"name":"Saltspray","mile":180},{"name":"Gull Harbor","mile":420},{"name":"Tidewatch","mile":660}],
 		"intro":"Nine hundred miles along a storm-battered shore. The sea gives fish and takes wagons. Watch the tide and the sky."},
 ]
 

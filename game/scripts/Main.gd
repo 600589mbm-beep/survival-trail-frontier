@@ -252,7 +252,15 @@ func _show_travel() -> void:
 	vb.add_child(_spacer(6))
 	vb.add_child(_label("Or stop for the day:", 22, _accent()))
 	vb.add_child(_button("Go Hunting  (uses ammo)", _go_hunting))
-	vb.add_child(_button("Visit Trading Post", _show_town))
+	var town := GameState.nearby_town()
+	if not town.is_empty():
+		vb.add_child(_button("Stop at %s  (Trading Post)" % town.name, _show_town))
+	else:
+		var nt := GameState.next_town()
+		if not nt.is_empty():
+			vb.add_child(_label("Next town: %s — %d mi ahead" % [nt.name, max(0, int(nt.mile) - GameState.miles)], 18, DIM))
+		else:
+			vb.add_child(_label("No towns ahead — you're on your own now.", 18, DIM))
 
 	vb.add_child(_spacer(10))
 	vb.add_child(_button("Save & Quit to Title", func():
@@ -376,23 +384,31 @@ func _go_hunting() -> void:
 # ---------- TRADING POST / TOWN ----------
 func _show_town() -> void:
 	var vb := _fresh()
-	vb.add_child(_label("Trading Post", 32, _accent(), true))
-	vb.add_child(_label("Coin: %d" % GameState.resources.money, 22, GOOD))
+	var town := GameState.nearby_town()
+	var title: String = ("Trading Post — %s" % town.name) if not town.is_empty() else "Trading Post"
+	vb.add_child(_label(title, 30, _accent(), true))
+	vb.add_child(_label("Coin: %d   (sell at ~half price)" % GameState.resources.money, 20, GOOD))
 	vb.add_child(_stat_panel())
 	vb.add_child(_spacer(6))
-	vb.add_child(_label("Buy supplies:", 20, _accent()))
+	vb.add_child(_label("Buy / Sell  (x5):", 20, _accent()))
 	for r in EventDB.OUTFITTER_PRICES.keys():
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
+		row.add_theme_constant_override("separation", 8)
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var name_l := _label("%s  (have %d)" % [EventDB.RESOURCE_LABELS[r], GameState.resources[r]], 20)
+		var name_l := _label("%s (%d)" % [EventDB.RESOURCE_LABELS[r], GameState.resources[r]], 19)
 		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(name_l)
 		var res_name := String(r)
-		var b5 := _button("+5  (%d)" % (GameState.outfitter_price(r) * 5), func(): _town_buy(res_name))
-		b5.custom_minimum_size = Vector2(150, 64)
+		var b5 := _button("Buy +5 (%d)" % (GameState.outfitter_price(r) * 5), func(): _town_buy(res_name))
+		b5.custom_minimum_size = Vector2(150, 60)
 		b5.size_flags_horizontal = 0
+		b5.disabled = GameState.resources["money"] < GameState.outfitter_price(r) * 5
 		row.add_child(b5)
+		var bs := _button("Sell -5 (+%d)" % (GameState.sell_price(r) * 5), func(): _town_sell(res_name))
+		bs.custom_minimum_size = Vector2(150, 60)
+		bs.size_flags_horizontal = 0
+		bs.disabled = GameState.resources[r] < 5
+		row.add_child(bs)
 		vb.add_child(row)
 	vb.add_child(_spacer(8))
 	vb.add_child(_button("Rest here 1 day (recover health & morale)", func():
@@ -403,6 +419,10 @@ func _show_town() -> void:
 
 func _town_buy(res_name: String) -> void:
 	GameState.buy(res_name, 5)
+	_show_town()
+
+func _town_sell(res_name: String) -> void:
+	GameState.sell(res_name, 5)
 	_show_town()
 
 # ---------- simple info/notice screen ----------
