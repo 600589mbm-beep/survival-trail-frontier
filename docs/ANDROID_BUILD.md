@@ -11,6 +11,10 @@ A full Android build toolchain was installed and an APK export was attempted **h
 - **Android build template** installed into `android/build/` (gitignored; regenerate via Project → Install Android Build Template).
 - **Export preset** committed: `export_presets.cfg` (preset "Android", arm64-v8a, Gradle build on, min/target SDK 24/34, offline — no network/internet permission).
 
+## What's verified vs blocked
+- **Verified:** `godot --headless --export-pack "Android" game.pck` succeeds (629 KB) — the project **data export works**; the engine/project are export-ready.
+- **Blocked headless:** the full APK packaging runs Godot's Android export-config *validation*, whose failure reasons Godot 4.6 emits **only into the editor GUI dialog**, not the CLI. Hand-assembling the APK from the prebuilt template is possible but cannot be **verified to boot** here (no Android device/emulator in this environment), so it isn't shipped — a 1-click GUI export is the correct, verifiable path.
+
 ## Finish the build (on a machine with the Godot 4.6 editor)
 1. Open the project in the Godot editor (the SDK/JDK paths above, or your own, in Editor Settings → Export → Android).
 2. Project → Install Android Build Template (if `android/build/` isn't present).
