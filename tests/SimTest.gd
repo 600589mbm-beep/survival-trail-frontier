@@ -43,11 +43,12 @@ func _play_one(idx: int) -> int:
 	_last_ending = {}
 	GameState.new_run(leader, route, wagon, false, 0)
 
-	# spend roughly half the coin on food/water so runs aren't all instant deaths
-	GameState.buy("food", 20)
-	GameState.buy("water", 20)
-	GameState.buy("feed", 10)
-	GameState.buy("medicine", 2)
+	# provision like a competent player: spread coin, weighted to food/water
+	var shop := ["food", "water", "food", "water", "feed", "medicine", "ammo"]
+	var s := 0
+	while GameState.resources.money >= 8 and s < 300:
+		GameState.buy(shop[s % shop.size()], 5)
+		s += 1
 
 	var days := 0
 	var paces := GameState.PACES.keys()

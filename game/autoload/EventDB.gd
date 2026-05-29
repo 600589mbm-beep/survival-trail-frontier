@@ -16,7 +16,7 @@ const OUTFITTER_PRICES := {
 }
 
 const DAILY_CONSUMPTION := {
-	"food": 2, "water": 2, "feed": 1,
+	"food": 1, "water": 1, "feed": 1,
 }
 
 # --- 5 selectable leaders ---

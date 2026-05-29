@@ -11,7 +11,7 @@ const PACES := {
 	"rest":     {"label":"Rest",     "miles":0,  "mult":0.5, "morale":4},
 }
 
-const BASE_MONEY := 60
+const BASE_MONEY := 90
 
 var leader_index: int = 0
 var leader: Dictionary = {}
@@ -54,9 +54,9 @@ func new_run(leader_idx: int, route_idx: int, wagon_id: String, is_daily: bool =
 	for r in EventDB.RESOURCES:
 		resources[r] = 0
 	resources["money"] = BASE_MONEY + int(wagon.get("start_money", 0))
-	resources["food"] = 20
-	resources["water"] = 20
-	resources["feed"] = 10
+	resources["food"] = 30
+	resources["water"] = 30
+	resources["feed"] = 15
 
 	party = []
 	party.append(_make_member(leader.name, leader.trait))
@@ -262,16 +262,16 @@ func _adjust_bond(who: String, amount: int) -> void:
 			if m.alive:
 				m.bond = clampi(m.bond + amount, 0, 100)
 	else:
-		var pick := _pick_alive()
+		var pick = _pick_alive()
 		if pick != null:
 			pick.bond = clampi(pick.bond + amount, 0, 100)
 
 func _apply_scarcity() -> void:
 	var penalty := 0
 	if resources["food"] <= 0:
-		penalty += 8
+		penalty += 4
 	if resources["water"] <= 0:
-		penalty += 10
+		penalty += 5
 	if penalty > 0:
 		_apply_health(-penalty, "all")
 		_adjust_morale(-3)
@@ -317,11 +317,11 @@ func _apply_health(amount: int, target: String) -> void:
 			if m.alive:
 				m.health = clampi(m.health + amount, 0, 100)
 	elif target == "worst":
-		var w := _worst()
+		var w = _worst()
 		if w != null:
 			w.health = clampi(w.health + amount, 0, 100)
 	else:
-		var pick := _pick_alive()
+		var pick = _pick_alive()
 		if pick != null:
 			pick.health = clampi(pick.health + amount, 0, 100)
 
@@ -376,8 +376,19 @@ func restore(d: Dictionary) -> void:
 	route_index = int(d.get("route_index", 0))
 	route = EventDB.ROUTES[route_index]
 	wagon = _wagon_by_id(String(d.get("wagon_id", "settler")))
-	party = d.party
-	resources = d.resources
+	# JSON parses all numbers as float; coerce back to int so state stays type-clean.
+	var p := []
+	for m in d.party:
+		p.append({
+			"name": String(m.name), "trait": String(m.trait),
+			"health": int(m.health), "alive": bool(m.alive),
+			"bond": int(m.get("bond", 60)), "conditions": m.get("conditions", []),
+		})
+	party = p
+	var res := {}
+	for k in d.resources.keys():
+		res[k] = int(d.resources[k])
+	resources = res
 	day = int(d.day)
 	miles = int(d.miles)
 	total_miles = int(d.total_miles)

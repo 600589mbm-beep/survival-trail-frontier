@@ -56,6 +56,9 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] Analytics funnel hooks (`Analytics.gd`: starts, ends, quit points, unfair flags, session length)
 - [x] **Automated crash/invariant/save-load harness** (`tests/SimTest.gd` — 400 randomized runs) + `tests/run_tests.sh`
 - [x] **CI** (`.github/workflows/ci.yml`) runs SimTest headless on push
+- [x] **Crash testing — EXECUTED on Godot 4.6.3:** 400 runs, 0 crashes/violations (`docs/TEST_RESULTS.md`)
+- [x] **Save/load testing — EXECUTED:** round-trip PASS
+- [x] **Balance verified & fixed:** was 100% fail → now 38% arrival (found+fixed 3 real bugs this pass)
 - [ ] 20 private testers; Android internal test; iOS TestFlight  *(needs devices/accounts — human)*
 - [ ] Low-end Android perf testing; store policy review  *(needs hardware — human)*
 
