@@ -95,6 +95,47 @@ func buy(res_name: String, qty: int) -> bool:
 	emit_signal("state_changed")
 	return true
 
+# --- a day spent NOT travelling (hunting / resting at a town). No miles, no random event. ---
+func pass_day_no_travel(pace_key: String, food_mult: float = 1.0) -> void:
+	if not running:
+		return
+	var alive := living_count()
+	for r in EventDB.DAILY_CONSUMPTION.keys():
+		var amt: int = int(round(EventDB.DAILY_CONSUMPTION[r] * alive * food_mult))
+		resources[r] = max(0, resources[r] - amt)
+	_apply_scarcity()
+	_progress_illness(pace_key) # "rest" clears exhaustion; "hunt" does not
+	day += 1
+	_roll_weather()
+	_resolve_health()
+	_log("Day %d — you %s." % [day - 1, ("rested in town" if pace_key == "rest" else "went hunting")])
+	emit_signal("state_changed")
+	if running:
+		SaveManager.save_game()
+	if living_count() <= 0:
+		_finish()
+
+# Spend ammo to begin a hunt (player-initiated). Returns false if no ammo.
+func begin_hunt() -> bool:
+	if resources["ammo"] < 1:
+		return false
+	resources["ammo"] = max(0, resources["ammo"] - 3)
+	pass_day_no_travel("hunt")
+	emit_signal("state_changed")
+	return true
+
+# Rest a day at a town: recover health + morale (costs the day's food/water).
+func rest_in_town() -> void:
+	pass_day_no_travel("rest")
+	if not running:
+		return
+	_apply_health(8, "all")
+	_adjust_morale(6)
+	_log("A night in town. The party recovers a little.")
+	emit_signal("state_changed")
+	if running:
+		SaveManager.save_game()
+
 # --- daily tick ---
 func advance_day(pace_key: String) -> Dictionary:
 	if not running:

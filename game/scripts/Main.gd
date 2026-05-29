@@ -249,6 +249,11 @@ func _show_travel() -> void:
 		var k := String(key)
 		vb.add_child(_button("%s — %d mi/day" % [p.label, p.miles], func(): _do_day(k)))
 
+	vb.add_child(_spacer(6))
+	vb.add_child(_label("Or stop for the day:", 22, _accent()))
+	vb.add_child(_button("Go Hunting  (uses ammo)", _go_hunting))
+	vb.add_child(_button("Visit Trading Post", _show_town))
+
 	vb.add_child(_spacer(10))
 	vb.add_child(_button("Save & Quit to Title", func():
 		SaveManager.save_game()
@@ -355,6 +360,60 @@ func _on_hunt_finished(hits: int, hunt) -> void:
 		return
 	var msg := "You bagged %d this time." % hits if hits > 0 else "Nothing. The herd got away."
 	_show_result(msg)
+
+# ---------- ON-DEMAND HUNT (player-initiated, classic-style) ----------
+func _go_hunting() -> void:
+	if GameState.resources["ammo"] < 1:
+		_info("Out of Ammo", "You have no ammunition. Buy some at a trading post before you can hunt.")
+		return
+	if not GameState.begin_hunt(): # spends ammo + a day
+		_info("Out of Ammo", "You have no ammunition.")
+		return
+	if not GameState.running:
+		return # the day spent hunting was fatal; ending shown via signal
+	_launch_hunt()
+
+# ---------- TRADING POST / TOWN ----------
+func _show_town() -> void:
+	var vb := _fresh()
+	vb.add_child(_label("Trading Post", 32, _accent(), true))
+	vb.add_child(_label("Coin: %d" % GameState.resources.money, 22, GOOD))
+	vb.add_child(_stat_panel())
+	vb.add_child(_spacer(6))
+	vb.add_child(_label("Buy supplies:", 20, _accent()))
+	for r in EventDB.OUTFITTER_PRICES.keys():
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var name_l := _label("%s  (have %d)" % [EventDB.RESOURCE_LABELS[r], GameState.resources[r]], 20)
+		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(name_l)
+		var res_name := String(r)
+		var b5 := _button("+5  (%d)" % (GameState.outfitter_price(r) * 5), func(): _town_buy(res_name))
+		b5.custom_minimum_size = Vector2(150, 64)
+		b5.size_flags_horizontal = 0
+		row.add_child(b5)
+		vb.add_child(row)
+	vb.add_child(_spacer(8))
+	vb.add_child(_button("Rest here 1 day (recover health & morale)", func():
+		GameState.rest_in_town()
+		if GameState.running:
+			_show_town()))
+	vb.add_child(_button("Back to the trail", _show_travel, true))
+
+func _town_buy(res_name: String) -> void:
+	GameState.buy(res_name, 5)
+	_show_town()
+
+# ---------- simple info/notice screen ----------
+func _info(title: String, text: String) -> void:
+	var vb := _fresh()
+	vb.add_child(_spacer(40))
+	vb.add_child(_label(title, 30, _accent(), true))
+	vb.add_child(_spacer(6))
+	vb.add_child(_label(text, 22))
+	vb.add_child(_spacer(20))
+	vb.add_child(_button("OK", _show_travel, true))
 
 # ---------- SETTINGS / STORE ----------
 func _show_settings() -> void:
