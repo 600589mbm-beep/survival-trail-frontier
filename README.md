@@ -26,10 +26,19 @@ All GDScript is parse-verified with `gdtoolkit` (`gdparse`). Visuals are code-dr
 ## Launch readiness
 All non-device launch artifacts are prepared: store listing copy (`docs/STORE_LISTING.md`), filled compliance answers (`docs/COMPLIANCE.md`), launch runbook (`docs/LAUNCH_RUNBOOK.md`), screenshot storyboard + 8 mockups, trailer script, press kit, and social/press drafts (`marketing/`). Remaining steps require devices, paid store accounts, and human testers — see `docs/LAUNCH_RUNBOOK.md`.
 
-## Run it
+## Play it now (no install)
+- **In your browser:** https://600589mbm-beep.github.io/survival-trail-frontier/play/
+- **Download for PC (Windows / Linux):** https://github.com/600589mbm-beep/survival-trail-frontier/releases/latest
+  - Windows: unzip → run `SurvivalTrailFrontier.exe` (unsigned indie build → SmartScreen "More info → Run anyway").
+  - Linux: unzip → `chmod +x SurvivalTrailFrontier.x86_64` → run.
+
+These are the **placeholder-art test build**. Mouse = touch.
+
+## Run from source
 1. Install **Godot 4.6.3 stable** (standard, not .NET).
 2. Open `project.godot` in the Godot editor.
 3. Press **F5** (main scene is `game/scenes/Main.tscn`).
+4. Export your own builds: Project → Export (presets for Windows/Linux/macOS/Web/Android are in `export_presets.cfg`).
 
 No external assets required — UI is drawn in code (placeholder art phase). Real art/audio layer on top without touching game logic.
 
