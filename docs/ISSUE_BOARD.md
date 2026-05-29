@@ -8,7 +8,7 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] ASO package (`docs/ASO_PACKAGE.md`)
 - [x] Godot 4.6 project + folders (game/docs/assets/marketing/builds)
 - [x] git branches: `main`, `develop`, `feature/*`
-- [ ] Push private GitHub repo (needs account auth)
+- [x] GitHub repo pushed — now **public** (`600589mbm-beep/survival-trail-frontier`)
 - [ ] Create GitHub Issues/Projects board from this file
 
 ## Milestone 2 — Playable Prototype ✅ (done)
@@ -72,7 +72,7 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [x] **Filled compliance answers** (`docs/COMPLIANCE.md`: Play Data Safety, Apple privacy labels, age rating)
 - [x] **8 real screenshots CAPTURED** from the running game (Godot 4.6.3 under xvfb) → `marketing/screenshots/shot_*.png` (placeholder-art UI; recapture after painted art)
 - [x] **30-second trailer RENDERED** (`marketing/trailer/trailer.mp4`, 30.0s, from 10 captured frames via ffmpeg; add music/VO per `SCRIPT.md`)
-- [x] **Landing page DEPLOYED LIVE** (you authorized it): https://600589mbm-beep.github.io/survival-trail-frontier-site/ — served via GitHub Pages from a dedicated public repo `survival-trail-frontier-site` (private repo's plan doesn't support Pages)
+- [x] **Landing page DEPLOYED LIVE:** https://600589mbm-beep.github.io/survival-trail-frontier/ — repo is now **public**, served via GitHub Pages from the main repo (`gh-pages` branch). (Earlier mirror at `survival-trail-frontier-site` still live, now redundant.)
 
 ## Milestone 9 — Soft Launch → Full Launch 🟡 (runbook + marketing kit ready)
 - [x] **Launch runbook** (`docs/LAUNCH_RUNBOOK.md`), **press kit** (`marketing/press-kit/`), **social/Reddit/press drafts** (`marketing/social/POSTS.md`)
