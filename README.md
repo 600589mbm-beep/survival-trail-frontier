@@ -20,6 +20,12 @@ Included now:
 
 All GDScript is parse-verified with `gdtoolkit` (`gdparse`). Visuals are code-drawn placeholder; painted art layers on top without touching logic.
 
+## Testing
+- `tests/run_tests.sh` (or GitHub Actions CI, `.github/workflows/ci.yml`) runs `tests/SimTest.gd` headless: **400 randomized playthroughs** across every leader/route/wagon, asserting no crashes, no negative resources, in-range health/miles, guaranteed termination, and a **save/load round-trip**.
+
+## Launch readiness
+All non-device launch artifacts are prepared: store listing copy (`docs/STORE_LISTING.md`), filled compliance answers (`docs/COMPLIANCE.md`), launch runbook (`docs/LAUNCH_RUNBOOK.md`), screenshot storyboard + 8 mockups, trailer script, press kit, and social/press drafts (`marketing/`). Remaining steps require devices, paid store accounts, and human testers — see `docs/LAUNCH_RUNBOOK.md`.
+
 ## Run it
 1. Install **Godot 4.6.3 stable** (standard, not .NET).
 2. Open `project.godot` in the Godot editor.

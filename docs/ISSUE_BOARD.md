@@ -52,20 +52,23 @@ Mirror these into GitHub Issues + Milestones (`gh issue create` / Projects board
 - [ ] Integrate real ads SDK (rewarded) + Store billing
 - [ ] Paid expansion routes (post-launch)
 
-## Milestone 7 — Testing 🔴 (needs devices/testers)
+## Milestone 7 — Testing 🟡 (automated harness done; live testing needs devices/testers)
 - [x] Analytics funnel hooks (`Analytics.gd`: starts, ends, quit points, unfair flags, session length)
-- [ ] 20 private testers; Android internal test; iOS TestFlight
-- [ ] Crash / save-load / low-end perf testing; store policy review
-- [ ] Track D1 retention, session length, completion rate, quit points
+- [x] **Automated crash/invariant/save-load harness** (`tests/SimTest.gd` — 400 randomized runs) + `tests/run_tests.sh`
+- [x] **CI** (`.github/workflows/ci.yml`) runs SimTest headless on push
+- [ ] 20 private testers; Android internal test; iOS TestFlight  *(needs devices/accounts — human)*
+- [ ] Low-end Android perf testing; store policy review  *(needs hardware — human)*
 
-## Milestone 8 — Store Launch Prep 🔴
+## Milestone 8 — Store Launch Prep 🟡 (all copy/compliance prepped; capture needs build)
 - [x] App icon (`icon.svg` master)
 - [x] Privacy policy draft (`docs/PRIVACY_POLICY.md`)
 - [x] Landing page (`marketing/landing-page/index.html`)
-- [ ] 8 screenshots + 30s trailer  *(capture from running build)*
-- [ ] Support email, age-rating forms, Play Data Safety, Apple privacy labels
+- [x] **Store listing copy** (`docs/STORE_LISTING.md`) + **support email defined**
+- [x] **Filled compliance answers** (`docs/COMPLIANCE.md`: Play Data Safety, Apple privacy labels, age rating)
+- [x] **Screenshot storyboard + 8 mockups** (`marketing/screenshots/`), **trailer script** (`marketing/trailer/`)
+- [ ] Capture 8 real screenshots + record 30s trailer from running build  *(needs build/devices — human)*
 
-## Milestone 9 — Soft Launch → Full Launch 🔴
-- [ ] Limited Android open test in one English market; tune tutorial/difficulty/ads/first-10-min
-- [ ] iOS + Android simultaneous full launch
-- [ ] Marketing push (TikTok, YT Shorts, Reddit indie/historical/survival, press list)
+## Milestone 9 — Soft Launch → Full Launch 🟡 (runbook + marketing kit ready)
+- [x] **Launch runbook** (`docs/LAUNCH_RUNBOOK.md`), **press kit** (`marketing/press-kit/`), **social/Reddit/press drafts** (`marketing/social/POSTS.md`)
+- [ ] Limited Android open test in one English market; tune tutorial/difficulty/ads/first-10-min  *(needs published build — human)*
+- [ ] iOS + Android simultaneous full launch; marketing push  *(needs store accounts — human)*

@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  sim-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Godot (headless)
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.3   # adjust if this exact build is unavailable
+          use-dotnet: false
+          include-templates: false
+
+      - name: Import project (build .godot cache)
+        run: godot --headless --path SurvivalTrailFrontier --import || true
+
+      - name: Run SimTest (crash / invariant / save-load)
+        run: godot --headless --path SurvivalTrailFrontier res://tests/SimTest.tscn
